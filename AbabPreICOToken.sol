@@ -173,25 +173,31 @@ contract AbabPreICOToken is ERC20Token {
     // ------------------------------------------------------------------------
     // Token information
     // ------------------------------------------------------------------------
-    string public constant symbol   = "preAAA";
+    string public constant symbol   = "pAA";
     string public constant name     = "AbabPreICOToken";
     uint8  public constant decimals = 18;
 
-    uint256 public STARTDATE;  // 2017-07-13T13:13:13 
-    uint256 public ENDDATE;    // 2017-07-23T13:13:13	
-	uint256 public BUYPRICE;   // BUYPRICE will calc $0.05 @ $246.03 ETH/USD
-    uint256 public CAP;        // Cap                $500K @ $246.03 ETH/USD
+    uint256 public STARTDATE;  
+    uint256 public ENDDATE;    
+    uint256 public BUYPRICE;   
+    uint256 public CAP;
 
-    // Cannot have a constant address here - Solidity bug
-    // https://github.com/ethereum/solidity/issues/2441
-    address public multisig;
-
-    function AbabPreICOToken(uint256 _start, uint256 _end, uint256 _cap, uint256 _buyPrice, address _multisig) {
+    function AbabPreICOToken() {
+        STARTDATE = 1499951593;        // 2017-07-13T13:13:13UTC to uint256 = 1499951593
+        ENDDATE   = 1500815593;        // 2017-07-23T13:13:13UTC to uint256 = 1500815593
+        BUYPRICE  = 4000;              // in eth will actualize before start. calc $0.05 @ $200 ETH/USD //  4000 pAA per ETH
+        CAP       = 2500*1 ether;      // in eth ($500K / 0.05 ) / etherPrice
+    }
+	
+    function ActualizePriceBeforeStart(uint256 _start, uint256 _end, uint256 _buyPrice, uint256 _cap) 
+    onlyOwner returns (bool success) 
+    {
+        require(now < STARTDATE);
         STARTDATE = _start;
         ENDDATE   = _end;
-        CAP       = _cap;
-		BUYPRICE  = _buyPrice;
-        multisig  = _multisig;
+        BUYPRICE  = _buyPrice;
+        CAP       = _cap; 
+        return true;
     }
 
     uint256 public totalEthers;
@@ -227,7 +233,7 @@ contract AbabPreICOToken is ERC20Token {
         Transfer(0x0, msg.sender, tokens);
 
         // Move the funds to a safe wallet
-        multisig.transfer(msg.value);
+        owner.transfer(msg.value);
     }
 
     // ------------------------------------------------------------------------
